@@ -4,6 +4,8 @@ import ssl
 import os
 import logging
 
+WAGGLE_NODE_ID = os.environ.get('WAGGLE_NODE_ID', '0000000000000000')
+
 def create_connection_parameters(host, port, username=None, password=None, cacertfile=None, certfile=None, keyfile=None):
     if username is not None:
         credentials = pika.PlainCredentials(username, password)
@@ -69,8 +71,12 @@ def main():
     src_connection = pika.BlockingConnection(src_params)
     src_channel = src_connection.channel()
 
+    user_id = f'node-{WAGGLE_NODE_ID}'
+
     def on_message(ch, method, properties, body):
-        logging.info("shoveling message")
+        logging.info("shoveling message %s %s", properties.reply_to, method.routing_key)
+        # TODO get user ID from credentials.
+        properties.user_id = user_id
         dest_channel.basic_publish(dest_exchange, method.routing_key, body, properties=properties)
         src_channel.basic_ack(method.delivery_tag)
         logging.info("shoveled message")

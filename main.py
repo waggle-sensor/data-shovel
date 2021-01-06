@@ -79,7 +79,7 @@ def main():
         properties.user_id = user_id
         dest_channel.basic_publish(dest_exchange, method.routing_key, body, properties=properties)
         src_channel.basic_ack(method.delivery_tag)
-        logging.info("shoveled message")
+        logging.info("ok")
 
     logging.info("starting message handler")
     src_channel.basic_consume(src_queue, on_message)
